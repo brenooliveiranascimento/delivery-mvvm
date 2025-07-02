@@ -1,30 +1,24 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { getCategories, getProducts } from "../../shared/services/get-products";
-import { Product } from "../../shared/interfaces/https/get-products";
+import { getProductsParams } from "../../shared/services/get-products";
+import {
+  GetProductsResponse,
+  Product,
+} from "../../shared/interfaces/https/get-products";
 import { useState } from "react";
-import { GetCategoriesResponse } from "../../shared/interfaces/https/get-categories";
 import { useProductsStore } from "../../shared/store/cart.store";
+import { formatProductsToSections } from "../../shared/utils/product.utils";
+import { SectionData } from "./interfaces/section-data";
 
-export interface SectionData {
-  title: string;
-  data: Product[];
+export interface ProductServices {
+  getProducts: (params: getProductsParams) => Promise<GetProductsResponse>;
+  getProductCategories: () => Promise<string[]>;
 }
 
-export interface HomeModel {
-  products: SectionData[];
-  isFetching: boolean;
-  isFetchingNextPage: boolean;
-  hasNextPage: boolean;
-  fetchNextPage: () => void;
-  refetch: () => void;
-  handleCategory: (category: string) => void;
-  categories: string[];
-  categorySelected: string | undefined;
-  isLoading: boolean;
-  cartProducts: Product[];
+interface useHomeModelParams {
+  productServices: ProductServices;
 }
 
-export const useHomeModel = (): HomeModel => {
+export const useHomeModel = ({ productServices }: useHomeModelParams) => {
   const { products: cartProducts } = useProductsStore();
   const [categorySelected, setCategorySelected] = useState<string | undefined>(
     undefined
@@ -39,48 +33,33 @@ export const useHomeModel = (): HomeModel => {
     isFetching,
     isFetchingNextPage,
     refetch,
-    error,
     isLoading,
   } = useInfiniteQuery({
     queryKey: ["products", categorySelected],
     queryFn: ({ pageParam }) =>
-      getProducts({ page: pageParam, perPage, category: categorySelected }),
+      productServices.getProducts({
+        page: pageParam,
+        perPage,
+        category: categorySelected,
+      }),
     initialPageParam: 1,
     getNextPageParam: (lastPage, _allPages, lastPageParam) => {
-      if (!lastPage || lastPage.length < perPage) {
+      console.log({ lastPageParam });
+      if (!lastPage || lastPageParam >= lastPage.totalPages) {
         return undefined;
       }
       return lastPageParam + 1;
     },
   });
 
-  const {
-    data: categories,
-    isLoading: loadingCategories,
-    error: categoryError,
-  } = useQuery({
+  const { data: categories } = useQuery({
     queryKey: ["categories"],
-    queryFn: getCategories,
+    queryFn: productServices.getProductCategories,
   });
 
-  const products: Product[] = data?.pages.flat() ?? [];
+  const products: Product[] = data?.pages.flatMap((page) => page.items) ?? [];
 
-  const formattedProducts: SectionData[] = products.reduce((acc, product) => {
-    const existingCategoryIndex = acc.findIndex(
-      (section) => section.title === product.category
-    );
-
-    if (existingCategoryIndex !== -1) {
-      acc[existingCategoryIndex].data.push(product);
-    } else {
-      acc.push({
-        title: product.category,
-        data: [product],
-      });
-    }
-
-    return acc;
-  }, [] as SectionData[]);
+  const formattedProducts: SectionData[] = formatProductsToSections(products);
 
   const handleCategory = (category: string) => {
     if (category === categorySelected) {

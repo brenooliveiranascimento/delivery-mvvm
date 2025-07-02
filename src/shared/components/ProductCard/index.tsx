@@ -1,9 +1,9 @@
 import { Text, TouchableOpacity, View } from "react-native";
-import { Product } from "../../../../shared/interfaces/https/get-products";
 import { FC } from "react";
 import { Image } from "expo-image";
 import { styles } from "./styles";
 import { router } from "expo-router";
+import { Product } from "../../interfaces/https/get-products";
 
 interface Props {
   product: Product;

@@ -2,7 +2,7 @@ import { deliveryApi } from "../api/delivery-api";
 import { GetCategoriesResponse } from "../interfaces/https/get-categories";
 import { GetProductsResponse, Product } from "../interfaces/https/get-products";
 
-interface getProductsParams {
+export interface getProductsParams {
   page: number;
   perPage: number;
   category?: string;
@@ -10,17 +10,17 @@ interface getProductsParams {
 
 export const getProducts = async (
   params: getProductsParams
-): Promise<Product[]> => {
+): Promise<GetProductsResponse> => {
   console.log(params);
   const { data } = await deliveryApi.post<GetProductsResponse>(
     "/products/paginated",
     params
   );
 
-  return data.items;
+  return data;
 };
 
-export const getCategories = async (): Promise<string[]> => {
+export const getProductCategories = async (): Promise<string[]> => {
   const { data } = await deliveryApi.get<GetCategoriesResponse>(
     "/products/categories"
   );

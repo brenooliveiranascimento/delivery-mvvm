@@ -1,28 +1,27 @@
 import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
-import { getProductDetail } from "../../shared/services/get-products";
 import { useProductsStore } from "../../shared/store/cart.store";
-import { Product } from "../../shared/interfaces/https/get-products";
 import { router } from "expo-router";
+import { Product } from "../../shared/interfaces/https/get-products";
 
-export interface ProductDetailModel {
-  productDetail: Product | undefined;
-  isLoading: boolean;
-  handleAddProduct: () => void;
+export interface ProductDetailServices {
+  getProductDetail: (productId: number) => Promise<Product>;
 }
 
-export const useProductDetailModel = (): ProductDetailModel => {
+export interface useHomeModelParams {
+  productDetailServices: ProductDetailServices;
+}
+
+export const useProductDetailModel = ({
+  productDetailServices,
+}: useHomeModelParams) => {
   const { id } = useLocalSearchParams();
 
   const { addProduct } = useProductsStore();
 
-  const {
-    data: productDetail,
-    isLoading,
-    error,
-  } = useQuery({
+  const { data: productDetail, isLoading } = useQuery({
     queryKey: ["productDetail", id],
-    queryFn: () => getProductDetail(Number(id)),
+    queryFn: () => productDetailServices.getProductDetail(Number(id)),
   });
 
   const handleAddProduct = () => {

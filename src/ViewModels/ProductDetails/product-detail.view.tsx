@@ -1,23 +1,21 @@
 import { FC } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { Image } from "expo-image";
 import { styles } from "./styles";
 import { LoadingScreen } from "../../shared/components/LoadingScreen";
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { ProductDetailModel } from "./product-details.model";
+import { useProductDetailModel } from "./product-details.model";
 
-export const ProductDetailView: FC<ProductDetailModel> = ({
-  isLoading,
-  productDetail,
-  handleAddProduct,
-}) => {
+export const ProductDetailView: FC<
+  ReturnType<typeof useProductDetailModel>
+> = ({ isLoading, productDetail, handleAddProduct }) => {
   if (isLoading) {
     return <LoadingScreen />;
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <Image source={{ uri: productDetail?.image }} style={styles.image} />
 
       <View style={styles.contentContainer}>
@@ -51,6 +49,6 @@ export const ProductDetailView: FC<ProductDetailModel> = ({
           </Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   );
 };

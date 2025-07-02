@@ -4,6 +4,7 @@ import { styles } from "./styles";
 import { FC } from "react";
 import { Link } from "expo-router";
 import { Product } from "../../../../shared/interfaces/https/get-products";
+import { Image } from "expo-image";
 
 interface Props {
   categories: string[];
@@ -22,9 +23,18 @@ export const Header: FC<Props> = ({
     <>
       <View style={styles.container}>
         <View style={styles.titleContainer}>
-          <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 24 }}>
-            Faça seu pedido
-          </Text>
+          <View>
+            <Image
+              source={require("../../../../../assets/Logo.png")}
+              style={{
+                width: 124,
+                height: 24,
+              }}
+            />
+            <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 24 }}>
+              Faça seu pedido
+            </Text>
+          </View>
 
           <Link
             href={{
